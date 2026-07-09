@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <istream>
 #include <optional>
-#include <ranges>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -49,8 +48,8 @@ class CSVReader {
     std::vector<std::unordered_map<std::string, std::string>> rows_;
     std::vector<std::string> headers_;
     std::optional<std::vector<std::string>> peeked_;
-    int64_t linesRead_;
-    int64_t recordsRead_;
+    int64_t linesRead_ = 0;
+    int64_t recordsRead_ = 0;
 };
 
 // Trim leading/trailing whitespace. Only applied to *unquoted* fields; a quoted
