@@ -1,0 +1,59 @@
+# Prerequisites
+*.d
+
+#format files
+*.clang-format
+compile_commands.json
+
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Linker files
+*.ilk
+
+# Debugger Files
+*.pdb
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# debug information files
+*.dwo
+
+# build folder
+
+build/
+venv/
+Testing/
+
+*.idx
+.cache/
+.ruff_cache/
+proposedArchitecture.md
+bin/
+lib/

@@ -1,0 +1,6 @@
+id,sku,price,currency,quantity,in_stock,rating,tags,created_at,release_date,weight_kg,dimensions,discount_pct,status,description,score,category_id
+1,ABC-123,19.99,USD,5,true,4.5,electronics|gadgets,2026-07-09T14:30:00Z,2026/07/09,0.45,10x5x3,12.5%,Active,A great product,0.87,42
+2,"XYZ, special edition",1234.56,EUR,10,false,,home|kitchen|sale,2026-01-02T08:00:00Z,2025/12/25,,20x20x20,0%,Pending,"He said ""the best ever""",0.5,
+3,NEW-1,5,GBP,0,1,3,tools,2026-03-15T00:00:00Z,2026/03/15,1.2,5x5x5,5%,Discontinued,"Multi-line
+description spanning rows",0.1,7
+4,   PAD-7   ,0.001,USD,999999,yes,,,2026-12-31T23:59:59Z,2026/12/31,42.0,1x1x1,100%,Active,"Trailing empty fields, note the commas",1,
