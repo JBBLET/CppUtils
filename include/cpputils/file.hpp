@@ -1,10 +1,10 @@
 #pragma once
+
 #include <filesystem>
 #include <format>
 #include <fstream>
 #include <string>
 #include <string_view>
-#include <utility>
 
 #include "cpputils/error.hpp"
 
@@ -29,7 +29,7 @@ inline File::File(std::string_view pathString) : path{pathString} {
 inline auto File::stream() -> std::ifstream {
     auto file = std::ifstream{path};
     ensure(file.is_open(), "Could not open file at {}", *this);
-    return std::move(file);
+    return file;
 };
 
 inline auto File::exists() const -> bool { return std::filesystem::exists(path); }
