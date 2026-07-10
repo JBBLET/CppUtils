@@ -1,13 +1,5 @@
 #pragma once
 
-// A deliberately maximal target type for `test/resources/kitchen_sink.csv`.
-//
-// The point of this file is NOT to be a realistic domain model -- it is to
-// enumerate every *category of conversion* your generic parser must let a user
-// plug in. For each member below, the comment marks which conversion category
-// it belongs to. Your library's job is to make the [BUILTIN] ones effortless
-// and the [CUSTOM] ones possible via a user-supplied transform function.
-
 #include <chrono>
 #include <cstdint>
 #include <optional>
@@ -16,12 +8,9 @@
 
 namespace csvutils::sample {
 
-// [ENUM<-string]  User maps token -> enumerator; also consider case-insensitivity.
 enum class Currency : std::uint8_t { USD, EUR, GBP };
 enum class Status : std::uint8_t { Active, Discontinued, Pending };
 
-// [CUSTOM struct]  One cell "10x5x3" must fan out into a small aggregate.
-// This is the flagship case for "user provides a transform function".
 struct Vec3 {
     double x{}, y{}, z{};
 };
