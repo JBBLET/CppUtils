@@ -9,13 +9,7 @@
 #include <vector>
 
 #include "cpputils/error.hpp"
-
-static char DEFAULT_SEPARATOR = ',';
-static char DEFAULT_QUOTE_CHARACTER = '"';
-static char DEFAULT_ESCAPE_CHARACTER = '"';
-static char DEFAULT_LINE_END = '\n';
-static char NO_QUOTE_CHARACTER = '\0';
-static char NO_ESCAPE_CHARACTER = '\0';
+#include "csv/csvDialectConstants.hpp"
 
 struct Reader {
     std::istream& stream;
