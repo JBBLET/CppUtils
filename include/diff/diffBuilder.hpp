@@ -3,7 +3,7 @@
 #include <utility>
 #include <vector>
 
-#include "DiffTypes.hpp"
+#include "diff/diffTypes.hpp"
 
 class DiffBuilder {
  protected:
