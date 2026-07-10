@@ -16,12 +16,14 @@ class CSVWriterHeaderAware {
     CSVWriterHeaderAware(CSVWriter writer, std::vector<std::string> headers);
 
     auto writeMap(const Row& row, bool applyQuotesToAll = true) -> void;  // ordered by headers_
-    auto writeAllMaps(const std::vector<Row>& rows) -> void;
+    auto writeAllMaps(const std::vector<Row>& rows, bool applyQuotesToAll = true) -> void;
 
     template <class T>
-    auto writeObject(const T& obj, const std::function<Row(const T&)>& transformFunc) -> void;
+    auto writeObject(const T& obj, const std::function<Row(const T&)>& transformFunc,
+                     bool applyQuotesToAll = true) -> void;
     template <class T>
-    auto writeAllObjects(const std::vector<T>& objs, const std::function<Row(const T&)>& transformFunc) -> void;
+    auto writeAllObjects(const std::vector<T>& objs, const std::function<Row(const T&)>& transformFunc,
+                         bool applyQuotesToAll = true) -> void;
 
     auto headers() const -> const std::vector<std::string>&;
 
@@ -31,7 +33,9 @@ class CSVWriterHeaderAware {
 };
 
 inline CSVWriterHeaderAware::CSVWriterHeaderAware(CSVWriter writer, std::vector<std::string> headers)
-    : writer_{writer}, headers_{std::move(headers)} {}
+    : writer_{std::move(writer)}, headers_{std::move(headers)} {
+    writer_.writeNext(headers_, /*applyQuotesToAll=*/false);  // header row, written on construction
+}
 
 inline auto CSVWriterHeaderAware::writeMap(const Row& row, bool applyQuotesToAll) -> void {
     auto selected = std::vector<std::string>{};
@@ -42,22 +46,24 @@ inline auto CSVWriterHeaderAware::writeMap(const Row& row, bool applyQuotesToAll
     writer_.writeNext(selected, applyQuotesToAll);
 }
 
-inline auto CSVWriterHeaderAware::writeAllMaps(const std::vector<Row>& rows) -> void {
+inline auto CSVWriterHeaderAware::writeAllMaps(const std::vector<Row>& rows, bool applyQuotesToAll) -> void {
     for (const Row& row : rows) {
-        writeMap(row);
+        writeMap(row, applyQuotesToAll);
     }
 }
 
 template <class T>
-inline auto CSVWriterHeaderAware::writeObject(const T& obj, const std::function<Row(const T&)>& transformFunc) -> void {
-    writeMap(*transformFunc(obj));
+inline auto CSVWriterHeaderAware::writeObject(const T& obj, const std::function<Row(const T&)>& transformFunc,
+                                              bool applyQuotesToAll) -> void {
+    writeMap(transformFunc(obj), applyQuotesToAll);
 }
 
 template <class T>
 inline auto CSVWriterHeaderAware::writeAllObjects(const std::vector<T>& objs,
-                                                  const std::function<Row(const T&)>& transformFunc) -> void {
+                                                  const std::function<Row(const T&)>& transformFunc,
+                                                  bool applyQuotesToAll) -> void {
     for (const T& obj : objs) {
-        writeMap(*transformFunc(obj));
+        writeMap(transformFunc(obj), applyQuotesToAll);
     }
 }
 

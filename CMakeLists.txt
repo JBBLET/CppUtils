@@ -36,19 +36,23 @@ target_include_directories(csvdiff INTERFACE
 target_link_libraries(csvdiff INTERFACE cpp::utils csv)   # diff needs core + csv reader
 add_library(cpp::csv::diff ALIAS csvdiff)
 
-# Main for Testing
-add_executable(main src/main.cpp)
-target_link_libraries(main PRIVATE cpp::csv)
-target_include_directories(main
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
-target_compile_options(main
-  PRIVATE -Wall
-  PRIVATE -Wextra
-)
+# Standalone-only targets (playground executable + tests). Skipped when CPPUtils is
+# pulled into another project via FetchContent/add_subdirectory.
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    # Main for Testing
+    add_executable(main src/main.cpp)
+    target_link_libraries(main PRIVATE cpp::csv)
+    target_include_directories(main
+        PUBLIC
+            ${CMAKE_CURRENT_SOURCE_DIR}/include
+    )
+    target_compile_options(main
+      PRIVATE -Wall
+      PRIVATE -Wextra
+    )
 
-# Testing
-enable_testing()
-add_subdirectory(test/readerTests)
-add_subdirectory(test/diffTests)
+    # Testing
+    enable_testing()
+    add_subdirectory(test/readerTests)
+    add_subdirectory(test/diffTests)
+endif()
