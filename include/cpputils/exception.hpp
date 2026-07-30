@@ -8,25 +8,32 @@
 
 namespace cpputils {
 
-class Exception : public std::runtime_error {
+// Skip is how many leading stacktrace frames to drop so frame 0 is the throw site.
+// Derived classes add one frame via their inherited constructor, hence Skip = 2 below.
+template <class Base, std::size_t Skip = 1>
+class TracedError : public Base {
  public:
     template <class... Args>
-    constexpr Exception(std::format_string<Args...> msg, Args&&... args);
+    constexpr TracedError(std::format_string<Args...> msg, Args&&... args)
+        : Base{std::format(msg, std::forward<Args>(args)...)},
+          what_{std::format("{}\n{}", Base::what(), std::stacktrace::current(Skip))} {}
 
-    constexpr auto to_string(this auto&& self) -> std::string;
+    constexpr auto to_string(this auto&& self) -> std::string { return self.what_; }
 
-    constexpr auto what() const noexcept -> const char* override;
+    constexpr auto what() const noexcept -> const char* override { return what_.c_str(); }
 
  private:
     std::string what_;
 };
 
-template <class... Args>
-constexpr Exception::Exception(std::format_string<Args...> msg, Args&&... args)
-    : std::runtime_error{std::format(msg, std::forward<Args>(args)...)},
-      what_{std::format("{}\n{}", std::runtime_error::what(), std::stacktrace::current(1)).c_str()} {}
+class Exception : public TracedError<std::runtime_error, 2> {
+ public:
+    using TracedError::TracedError;
+};
 
-constexpr auto Exception::to_string(this auto&& self) -> std::string { return self.what_; }
+class InvalidArgument : public TracedError<std::invalid_argument, 2> {
+ public:
+    using TracedError::TracedError;
+};
 
-constexpr auto Exception::what() const noexcept -> const char* { return what_.c_str(); }
 }  // namespace cpputils

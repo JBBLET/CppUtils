@@ -11,7 +11,9 @@ namespace cpputils {
 template <class... Args>
 constexpr auto expect(bool predicate, std::format_string<Args...> msg, Args&&... args) -> void;
 
-template <class... Args>
+// E selects the thrown type: Exception (default) for runtime/state failures,
+// InvalidArgument for precondition violations.
+template <class E = Exception, class... Args>
 constexpr auto ensure(bool predicate, std::format_string<Args...> msg, Args&&... args) -> void;
 
 template <class... Args>
@@ -24,10 +26,10 @@ constexpr auto expect(bool predicate, std::format_string<Args...> msg, Args&&...
     }
 }
 
-template <class... Args>
+template <class E, class... Args>
 constexpr auto ensure(bool predicate, std::format_string<Args...> msg, Args&&... args) -> void {
     if (!predicate) {
-        throw Exception(msg, std::forward<Args>(args)...);
+        throw E(msg, std::forward<Args>(args)...);
     }
 }
 }  // namespace cpputils
