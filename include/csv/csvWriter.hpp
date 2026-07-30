@@ -10,6 +10,8 @@
 
 #include "csv/csvDialectConstants.hpp"
 
+namespace cpputils::csv {
+
 struct Writer {
     std::ostream& stream;
     char separatorCharacter{DEFAULT_SEPARATOR};
@@ -114,3 +116,4 @@ inline auto CSVWriter::getException() const -> std::optional<std::string> { retu
 inline auto CSVWriter::getRecordsWritten() const -> int64_t { return recordsWritten_; }
 
 inline auto CSVWriter::getLinesWritten() const -> int64_t { return linesWritten_; }
+}  // namespace cpputils::csv

@@ -7,6 +7,7 @@
 #include "cpputils/exception.hpp"
 #include "cpputils/logging.hpp"
 
+namespace cpputils {
 template <class... Args>
 constexpr auto expect(bool predicate, std::format_string<Args...> msg, Args&&... args) -> void;
 
@@ -29,3 +30,4 @@ constexpr auto ensure(bool predicate, std::format_string<Args...> msg, Args&&...
         throw Exception(msg, std::forward<Args>(args)...);
     }
 }
+}  // namespace cpputils

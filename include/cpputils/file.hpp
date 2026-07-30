@@ -8,6 +8,8 @@
 
 #include "cpputils/error.hpp"
 
+namespace cpputils::files {
+
 struct File {
     std::filesystem::path path;
 
@@ -33,3 +35,4 @@ inline auto File::stream() -> std::ifstream {
 };
 
 inline auto File::exists() const -> bool { return std::filesystem::exists(path); }
+}  // namespace cpputils::files

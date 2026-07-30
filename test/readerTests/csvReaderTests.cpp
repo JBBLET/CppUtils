@@ -17,10 +17,23 @@
 namespace {
 
 // Column order of kitchen_sink.csv, used across several assertions.
-const std::vector<std::string> kHeader = {
-    "id",         "sku",         "price",     "currency",    "quantity",  "in_stock",
-    "rating",     "tags",        "created_at", "release_date", "weight_kg", "dimensions",
-    "discount_pct", "status",    "description", "score",      "category_id"};
+const std::vector<std::string> kHeader = {"id",
+                                          "sku",
+                                          "price",
+                                          "currency",
+                                          "quantity",
+                                          "in_stock",
+                                          "rating",
+                                          "tags",
+                                          "created_at",
+                                          "release_date",
+                                          "weight_kg",
+                                          "dimensions",
+                                          "discount_pct",
+                                          "status",
+                                          "description",
+                                          "score",
+                                          "category_id"};
 
 // Fresh stream over the on-disk fixture. The stream must outlive the reader,
 // so callers keep it as a local.
@@ -34,7 +47,7 @@ auto kitchenSink() -> std::ifstream {
 
 TEST(CSVReader, ReadsHeaderRowAsFirstRecord) {
     auto in = kitchenSink();
-    CSVReader reader{in};
+    cpputils::csv::CSVReader reader{in};
 
     auto header = reader.readNext();
     ASSERT_TRUE(header.has_value());
@@ -44,7 +57,7 @@ TEST(CSVReader, ReadsHeaderRowAsFirstRecord) {
 
 TEST(CSVReader, ReadAllReturnsHeaderPlusEveryDataRow) {
     auto in = kitchenSink();
-    CSVReader reader{in};
+    cpputils::csv::CSVReader reader{in};
 
     auto rows = reader.readAll();
     // 1 header + 4 data rows. The multi-line quoted field in row 3 must NOT be
@@ -55,7 +68,7 @@ TEST(CSVReader, ReadAllReturnsHeaderPlusEveryDataRow) {
 
 TEST(CSVReader, KeepsCommaInsideQuotedField) {
     auto in = kitchenSink();
-    CSVReader reader{in};
+    cpputils::csv::CSVReader reader{in};
     reader.skip(1);  // header
 
     auto row1 = reader.readNext();
@@ -68,7 +81,7 @@ TEST(CSVReader, KeepsCommaInsideQuotedField) {
 
 TEST(CSVReader, UnescapesDoubledQuotes) {
     auto in = kitchenSink();
-    CSVReader reader{in};
+    cpputils::csv::CSVReader reader{in};
     reader.skip(2);  // header + row 1
 
     auto row2 = reader.readNext();
@@ -79,7 +92,7 @@ TEST(CSVReader, UnescapesDoubledQuotes) {
 
 TEST(CSVReader, KeepsEmbeddedNewlineInsideQuotes) {
     auto in = kitchenSink();
-    CSVReader reader{in};
+    cpputils::csv::CSVReader reader{in};
     reader.skip(3);  // header + rows 1,2
 
     auto row3 = reader.readNext();
@@ -89,7 +102,7 @@ TEST(CSVReader, KeepsEmbeddedNewlineInsideQuotes) {
 
 TEST(CSVReader, TrimsWhitespaceFromUnquotedField) {
     auto in = kitchenSink();
-    CSVReader reader{in};
+    cpputils::csv::CSVReader reader{in};
     reader.skip(4);  // header + rows 1,2,3
 
     auto row4 = reader.readNext();
@@ -100,7 +113,7 @@ TEST(CSVReader, TrimsWhitespaceFromUnquotedField) {
 
 TEST(CSVReader, ReturnsNulloptPastEndOfInput) {
     auto in = kitchenSink();
-    CSVReader reader{in};
+    cpputils::csv::CSVReader reader{in};
 
     reader.skip(5);  // header + 4 data rows
     EXPECT_FALSE(reader.readNext().has_value());
@@ -109,7 +122,7 @@ TEST(CSVReader, ReturnsNulloptPastEndOfInput) {
 
 TEST(CSVReader, RecordAndLineCountersAdvance) {
     auto in = kitchenSink();
-    CSVReader reader{in};
+    cpputils::csv::CSVReader reader{in};
 
     reader.readAll();
     EXPECT_EQ(reader.getRecordsRead(), 5);
@@ -119,7 +132,7 @@ TEST(CSVReader, RecordAndLineCountersAdvance) {
 
 TEST(CSVReader, PeekDoesNotConsume) {
     auto in = kitchenSink();
-    CSVReader reader{in};
+    cpputils::csv::CSVReader reader{in};
 
     auto peeked = reader.peek();
     ASSERT_TRUE(peeked.has_value());
@@ -132,7 +145,7 @@ TEST(CSVReader, PeekDoesNotConsume) {
 
 TEST(CSVReader, ParsesInlineStreamWithoutTrailingNewline) {
     std::istringstream in{"a,b,c\n1,2,3"};  // no newline after last record
-    CSVReader reader{in};
+    cpputils::csv::CSVReader reader{in};
 
     auto header = reader.readNext();
     auto row = reader.readNext();
@@ -143,8 +156,8 @@ TEST(CSVReader, ParsesInlineStreamWithoutTrailingNewline) {
 
 TEST(CSVReader, ThrowsOnUnterminatedQuotedField) {
     std::istringstream in{"a,b\n\"oops,still open"};
-    CSVReader reader{in};
+    cpputils::csv::CSVReader reader{in};
     reader.readNext();  // header
 
-    EXPECT_THROW(reader.readNext(), Exception);
+    EXPECT_THROW(reader.readNext(), cpputils::Exception);
 }

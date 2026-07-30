@@ -5,6 +5,8 @@
 
 #include "diff/diffTypes.hpp"
 
+namespace cpputils::diff {
+
 class DiffBuilder {
  protected:
     struct Config {
@@ -53,3 +55,4 @@ class DiffBuilder {
     virtual std::vector<DiffEntry> build(const std::vector<std::string>& referenceFiles,
                                          const std::vector<std::string>& actualFiles) = 0;
 };
+}  // namespace cpputils::diff

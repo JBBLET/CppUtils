@@ -14,7 +14,7 @@
 
 #include "cpputils/error.hpp"
 
-namespace csv::convert {
+namespace cpputils::csv::convert {
 
 // [BUILTIN int/uint] Whole cell must be consumed, else it's a parse error.
 template <std::integral T>
@@ -50,4 +50,4 @@ inline auto parseBool(std::string_view s) -> bool {
 // [BUILTIN string] Identity: the cell is already the value (reader trims it).
 inline auto parseString(std::string_view s) -> std::string { return std::string{s}; }
 
-}  // namespace csv::convert
+}  // namespace cpputils::csv::convert

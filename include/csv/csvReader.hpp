@@ -11,6 +11,8 @@
 #include "cpputils/error.hpp"
 #include "csv/csvDialectConstants.hpp"
 
+namespace cpputils::csv {
+
 struct Reader {
     std::istream& stream;
     char separatorCharacter{DEFAULT_SEPARATOR};
@@ -104,7 +106,7 @@ static auto readRecord(std::istream& file, std::vector<std::string>& record, cha
             }
         }
     }
-    ensure(!inQuotes, "Unterminated quoted field at end of file");
+    cpputils::ensure(!inQuotes, "Unterminated quoted field at end of file");
     ++linesRead;
     if (!sawInput) {
         return false;  // clean EOF: no more records
@@ -167,3 +169,4 @@ inline auto CSVReader::close() -> void { reader_.stream.clear(); }
 inline auto CSVReader::getLinesRead() -> int64_t { return linesRead_; }
 
 inline auto CSVReader::getRecordsRead() -> int64_t { return recordsRead_; }
+}  // namespace cpputils::csv

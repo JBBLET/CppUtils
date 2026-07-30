@@ -11,6 +11,8 @@
 
 #include "csv/csvReader.hpp"
 
+namespace cpputils::csv {
+
 using Row = std::unordered_map<std::string, std::string>;
 
 class CSVReaderHeaderAware {
@@ -35,14 +37,15 @@ class CSVReaderHeaderAware {
 
 inline CSVReaderHeaderAware::CSVReaderHeaderAware(CSVReader reader) : reader_{std::move(reader)} {
     auto first = reader_.readNext();
-    ensure(first.has_value(), "CSV has no header row");
+    cpputils::ensure(first.has_value(), "CSV has no header row");
     headers_ = std::move(*first);
 }
 
 inline auto CSVReaderHeaderAware::readMap() -> std::optional<Row> {
     auto row = reader_.readNext();
     if (!row) return std::nullopt;
-    ensure(row->size() == headers_.size(), "Row has {} fields but header has {}", row->size(), headers_.size());
+    cpputils::ensure(
+        row->size() == headers_.size(), "Row has {} fields but header has {}", row->size(), headers_.size());
     std::unordered_map<std::string, std::string> out;
     for (std::size_t i = 0; i < headers_.size(); ++i) out.emplace(headers_[i], std::move((*row)[i]));
     return out;
@@ -61,7 +64,7 @@ inline auto CSVReaderHeaderAware::readNext(const std::vector<std::string>& colum
     out.reserve(columns.size());
     for (const auto& name : columns) {
         auto it = std::ranges::find(headers_, name);
-        ensure(it != headers_.end(), "Unknown column '{}'", name);
+        cpputils::ensure(it != headers_.end(), "Unknown column '{}'", name);
         out.push_back((*row)[std::distance(headers_.begin(), it)]);
     }
     return out;
@@ -81,3 +84,4 @@ inline auto CSVReaderHeaderAware::readAllObjects(const std::function<T(Row)>& tr
     return output;
 }
 inline auto CSVReaderHeaderAware::headers() const -> const std::vector<std::string>& { return headers_; }
+}  // namespace cpputils::csv

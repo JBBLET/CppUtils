@@ -16,6 +16,10 @@
 #define DIFF_FIXTURE_DIR "test/diffTests"
 #endif
 
+using cpputils::diff::DiffBuilder;
+using cpputils::diff::DiffEntry;
+using cpputils::diff::DiffType;
+
 namespace {
 
 namespace fs = std::filesystem;
@@ -53,14 +57,14 @@ auto firstOfType(const std::vector<DiffEntry>& diffs, DiffType type) -> DiffEntr
 
 class CSVDiffTest : public ::testing::Test {
  protected:
-    CSVDiffBuilder builder;
+    cpputils::csv::CSVDiffBuilder builder;
 };
 
 // The diff builder now delegates tokenization to CSVReader; this pins the
 // quoted-comma behaviour it relies on.
 TEST_F(CSVDiffTest, HandlesQuotedCells) {
     std::istringstream in{"ID1,\"Name, With Comma\",Value1"};
-    CSVReader reader{in};
+    cpputils::csv::CSVReader reader{in};
 
     auto fields = reader.readNext();
     ASSERT_TRUE(fields.has_value());

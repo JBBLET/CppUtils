@@ -34,7 +34,7 @@ auto kitchenSink() -> std::ifstream {
 
 TEST(CSVReaderHeaderAware, ConstructorConsumesHeaderRow) {
     auto in = kitchenSink();
-    CSVReaderHeaderAware reader{CSVReader{in}};
+    cpputils::csv::CSVReaderHeaderAware reader{cpputils::csv::CSVReader{in}};
 
     ASSERT_EQ(reader.headers().size(), 17u);
     EXPECT_EQ(reader.headers().front(), "id");
@@ -44,12 +44,12 @@ TEST(CSVReaderHeaderAware, ConstructorConsumesHeaderRow) {
 
 TEST(CSVReaderHeaderAware, ThrowsWhenStreamHasNoHeader) {
     std::istringstream empty{""};
-    EXPECT_THROW(CSVReaderHeaderAware{CSVReader{empty}}, Exception);
+    EXPECT_THROW(cpputils::csv::CSVReaderHeaderAware{cpputils::csv::CSVReader{empty}}, cpputils::Exception);
 }
 
 TEST(CSVReaderHeaderAware, ReadMapKeysCellsByHeader) {
     auto in = kitchenSink();
-    CSVReaderHeaderAware reader{CSVReader{in}};
+    cpputils::csv::CSVReaderHeaderAware reader{cpputils::csv::CSVReader{in}};
 
     auto row = reader.readMap();
     ASSERT_TRUE(row.has_value());
@@ -62,7 +62,7 @@ TEST(CSVReaderHeaderAware, ReadMapKeysCellsByHeader) {
 
 TEST(CSVReaderHeaderAware, ReadMapReturnsNulloptAtEnd) {
     auto in = kitchenSink();
-    CSVReaderHeaderAware reader{CSVReader{in}};
+    cpputils::csv::CSVReaderHeaderAware reader{cpputils::csv::CSVReader{in}};
 
     for (int i = 0; i < 4; ++i) EXPECT_TRUE(reader.readMap().has_value());
     EXPECT_FALSE(reader.readMap().has_value());
@@ -70,7 +70,7 @@ TEST(CSVReaderHeaderAware, ReadMapReturnsNulloptAtEnd) {
 
 TEST(CSVReaderHeaderAware, ReadAllMapsReturnsEveryDataRow) {
     auto in = kitchenSink();
-    CSVReaderHeaderAware reader{CSVReader{in}};
+    cpputils::csv::CSVReaderHeaderAware reader{cpputils::csv::CSVReader{in}};
 
     auto rows = reader.readAllMaps();
     ASSERT_EQ(rows.size(), 4u);
@@ -80,14 +80,14 @@ TEST(CSVReaderHeaderAware, ReadAllMapsReturnsEveryDataRow) {
 
 TEST(CSVReaderHeaderAware, ThrowsWhenRowFieldCountMismatchesHeader) {
     std::istringstream in{"a,b,c\n1,2\n"};  // data row has 2 fields, header has 3
-    CSVReaderHeaderAware reader{CSVReader{in}};
+    cpputils::csv::CSVReaderHeaderAware reader{cpputils::csv::CSVReader{in}};
 
-    EXPECT_THROW(reader.readMap(), Exception);
+    EXPECT_THROW(reader.readMap(), cpputils::Exception);
 }
 
 TEST(CSVReaderHeaderAware, ReadNextSelectsColumnsByName) {
     auto in = kitchenSink();
-    CSVReaderHeaderAware reader{CSVReader{in}};
+    cpputils::csv::CSVReaderHeaderAware reader{cpputils::csv::CSVReader{in}};
 
     auto picked = reader.readNext({"sku", "status", "quantity"});
     ASSERT_TRUE(picked.has_value());
@@ -96,14 +96,14 @@ TEST(CSVReaderHeaderAware, ReadNextSelectsColumnsByName) {
 
 TEST(CSVReaderHeaderAware, ReadNextThrowsOnUnknownColumn) {
     auto in = kitchenSink();
-    CSVReaderHeaderAware reader{CSVReader{in}};
+    cpputils::csv::CSVReaderHeaderAware reader{cpputils::csv::CSVReader{in}};
 
-    EXPECT_THROW(reader.readNext({"does_not_exist"}), Exception);
+    EXPECT_THROW(reader.readNext({"does_not_exist"}), cpputils::Exception);
 }
 
 TEST(CSVReaderHeaderAware, ReadNextObjectTransformsSingleRow) {
     auto in = kitchenSink();
-    CSVReaderHeaderAware reader{CSVReader{in}};
+    cpputils::csv::CSVReaderHeaderAware reader{cpputils::csv::CSVReader{in}};
 
     auto product = reader.readNextObject<Product>(productFromRow);
     ASSERT_TRUE(product.has_value());
@@ -126,7 +126,7 @@ TEST(CSVReaderHeaderAware, ReadNextObjectTransformsSingleRow) {
 
 TEST(CSVReaderHeaderAware, ReadNextObjectReturnsNulloptAtEnd) {
     auto in = kitchenSink();
-    CSVReaderHeaderAware reader{CSVReader{in}};
+    cpputils::csv::CSVReaderHeaderAware reader{cpputils::csv::CSVReader{in}};
 
     for (int i = 0; i < 4; ++i) EXPECT_TRUE(reader.readNextObject<Product>(productFromRow).has_value());
     EXPECT_FALSE(reader.readNextObject<Product>(productFromRow).has_value());
@@ -134,7 +134,7 @@ TEST(CSVReaderHeaderAware, ReadNextObjectReturnsNulloptAtEnd) {
 
 TEST(CSVReaderHeaderAware, ReadAllObjectsParsesWholeFixture) {
     auto in = kitchenSink();
-    CSVReaderHeaderAware reader{CSVReader{in}};
+    cpputils::csv::CSVReaderHeaderAware reader{cpputils::csv::CSVReader{in}};
 
     auto products = reader.readAllObjects<Product>(productFromRow);
     ASSERT_EQ(products.size(), 4u);
@@ -164,10 +164,10 @@ TEST(CSVReaderHeaderAware, ReadAllObjectsParsesWholeFixture) {
 
 TEST(CSVReaderHeaderAware, ReadAllObjectsAcceptsInlineLambdaTransform) {
     auto in = kitchenSink();
-    CSVReaderHeaderAware reader{CSVReader{in}};
+    cpputils::csv::CSVReaderHeaderAware reader{cpputils::csv::CSVReader{in}};
 
     // Exercise the template with a caller-supplied transform other than productFromRow.
-    std::function<std::string(Row)> skuOf = [](const Row& row) { return row.at("sku"); };
+    std::function<std::string(cpputils::csv::Row)> skuOf = [](const cpputils::csv::Row& row) { return row.at("sku"); };
     auto skus = reader.readAllObjects<std::string>(skuOf);
     ASSERT_EQ(skus.size(), 4u);
     EXPECT_EQ(skus.front(), "ABC-123");

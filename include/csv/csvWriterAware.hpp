@@ -8,6 +8,7 @@
 
 #include "csv/csvWriter.hpp"
 
+namespace cpputils::csv {
 using Row = std::unordered_map<std::string, std::string>;  // same alias as csvReaderAware.hpp
 
 class CSVWriterHeaderAware {
@@ -19,8 +20,8 @@ class CSVWriterHeaderAware {
     auto writeAllMaps(const std::vector<Row>& rows, bool applyQuotesToAll = true) -> void;
 
     template <class T>
-    auto writeObject(const T& obj, const std::function<Row(const T&)>& transformFunc,
-                     bool applyQuotesToAll = true) -> void;
+    auto writeObject(const T& obj, const std::function<Row(const T&)>& transformFunc, bool applyQuotesToAll = true)
+        -> void;
     template <class T>
     auto writeAllObjects(const std::vector<T>& objs, const std::function<Row(const T&)>& transformFunc,
                          bool applyQuotesToAll = true) -> void;
@@ -68,3 +69,4 @@ inline auto CSVWriterHeaderAware::writeAllObjects(const std::vector<T>& objs,
 }
 
 inline auto CSVWriterHeaderAware::headers() const -> const std::vector<std::string>& { return headers_; }
+}  // namespace cpputils::csv

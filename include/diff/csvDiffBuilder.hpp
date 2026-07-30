@@ -9,6 +9,13 @@
 
 #include "csv/csvReader.hpp"
 #include "diff/diffBuilder.hpp"
+#include "diff/diffTypes.hpp"
+
+namespace cpputils::csv {
+
+using cpputils::diff::DiffBuilder;
+using cpputils::diff::DiffEntry;
+using cpputils::diff::DiffType;
 
 struct IndexedRow {
     size_t hash;
@@ -217,3 +224,4 @@ inline std::string CSVDiffBuilder::extractIdFromFields(const std::vector<std::st
     }
     return combinedId;
 }
+}  // namespace cpputils::csv

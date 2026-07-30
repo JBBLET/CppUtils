@@ -2,6 +2,7 @@
 
 #include <string>
 
+namespace cpputils::diff {
 enum class DiffType {
     ENTRY_ADDITION,
     ENTRY_DELETION,
@@ -18,3 +19,4 @@ struct DiffEntry {
     std::string newValue;
     std::string uniqueIdentifier;
 };
+}  // namespace cpputils::diff
