@@ -1,6 +1,3 @@
-find_package(GTest REQUIRED)
-include(GoogleTest)
-
 # Absolute path to the shared fixture so tests don't depend on the ctest CWD.
 set(KITCHEN_SINK_CSV "${CMAKE_SOURCE_DIR}/test/resources/kitchen_sink.csv")
 

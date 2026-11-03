@@ -1,6 +1,3 @@
-find_package(GTest REQUIRED)
-include(GoogleTest)
-
 add_executable(diff_tests csvDifftests.cpp)
 
 target_link_libraries(diff_tests
