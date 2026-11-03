@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.25) #4.4 verified
 
 project(CPPUtils LANGUAGES CXX VERSION 0.1)
 
@@ -35,6 +35,17 @@ target_include_directories(csvdiff INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 target_link_libraries(csvdiff INTERFACE cpp::utils csv)   # diff needs core + csv reader
 add_library(cpp::csv::diff ALIAS csvdiff)
+
+# JSON serializer (header-only, C++26 reflection)
+add_library(json INTERFACE)
+target_include_directories(json INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
+target_compile_features(json INTERFACE cxx_std_26)
+# Reflection is header-only, so the flag must reach every consumer → INTERFACE.
+# ⚠ Confirm the exact flag name on your GCC 16 (see below) before trusting this.
+target_compile_options(json INTERFACE
+  $<$<CXX_COMPILER_ID:GNU>:-freflection>)
+add_library(cpp::json ALIAS json)
 
 # Standalone-only targets (playground executable + tests). Skipped when CPPUtils is
 # pulled into another project via FetchContent/add_subdirectory.
