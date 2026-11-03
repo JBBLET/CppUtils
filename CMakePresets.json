@@ -1,0 +1,23 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "gcc16",
+      "binaryDir": "build",
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "g++-16",
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
+      "name": "dev",
+      "inherits":"gcc16",
+      "cacheVariables": {
+        "CPPPROJECTS_TEST_CPP_UTILS": "OFF",
+        "CPPPROJECTS_TEST_CSV": "OFF",
+        "CPPPROJECTS_TEST_JSON": "OFF",
+        "CPPPROJECTS_TEST_CSV_DIFF": "OFF"
+      }
+    }
+  ]
+}

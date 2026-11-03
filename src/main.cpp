@@ -1,31 +1,11 @@
+#include <meta>
 
+struct Smoke { int a; double b; };
 
 int main() {
-    //    try {
-    //        auto csv = File("test/resources/kitchen_sink.csv");
-    //        logging::info("{} File found", csv);
-    //        auto file = csv.stream();
-    //        auto reader = CSVReaderHeaderAware{file};
-    //
-    //        auto products = reader.readAllObjects<Product>(productFromRow);
-    //
-    //        std::println("Parsed {} products", products.size());
-    //        for (const auto& p : products) {
-    //            std::println("  #{} sku='{}' price={} qty={} inStock={} tags={} dims=({},{},{}) discount={}%",
-    //                         p.id,
-    //                         p.sku,
-    //                         p.price,
-    //                         p.quantity,
-    //                         p.inStock,
-    //                         p.tags.size(),
-    //                         p.dimensions.x,
-    //                         p.dimensions.y,
-    //                         p.dimensions.z,
-    //                         p.discountPct);
-    //        }
-    //        return 0;
-    //    } catch (const Exception& e) {
-    //        std::println("{}", e.what());
-    //        return 1;
-    //    }
+    template for (constexpr auto m : std::define_static_array(
+            std::meta::nonstatic_data_members_of(^^Smoke,
+                std::meta::access_context::unchecked()))) {
+        (void) std::meta::identifier_of(m);
+    }
 }

@@ -1,14 +1,15 @@
 cmake_minimum_required(VERSION 3.25) #4.4 verified
-project(CPPUtils LANGUAGES CXX VERSION 0.1)
 
+project(CPPUtils LANGUAGES CXX VERSION 0.1)
+if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16)
+  message(FATAL_ERROR "GCC >= 16 required (-freflection). Got ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+endif()
 include(CMakeDependentOption)
 include(CTest) 
 
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_C_COMPILER "gcc-16")
-set(CMAKE_CXX_COMPILER "/usr/bin/gcc-16")
 
 # Default to a debug-info build so std::stacktrace can resolve names + lines.
 if(NOT CMAKE_BUILD_TYPE)
