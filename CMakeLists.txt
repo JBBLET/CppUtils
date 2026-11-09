@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.25) #4.4 verified
 
 project(CPPUtils LANGUAGES CXX VERSION 0.1)
 if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16)
-  message(FATAL_ERROR "GCC >= 16 required (-freflection). Got ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+    message(FATAL_ERROR "GCC >= 16 required (-freflection). Got ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 endif()
 include(CMakeDependentOption)
-include(CTest) 
+include(CTest)
 
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -21,15 +21,15 @@ set(CPPPROJECTS_PARTS cpp_utils csv csv_diff json)
 
 # One option per part, only available when BUILD_TESTING is ON
 foreach(part IN LISTS CPPPROJECTS_PARTS)
-  string(TOUPPER "${part}" PART)
-  cmake_dependent_option(CPPPROJECTS_TEST_${PART}
+    string(TOUPPER "${part}" PART)
+    cmake_dependent_option(CPPPROJECTS_TEST_${PART}
     "Build tests for ${part}" ON "BUILD_TESTING" OFF)
 endforeach()
 
-# Dependency 
+# Dependency
 if(BUILD_TESTING)
-  find_package(GTest REQUIRED)
-  include(GoogleTest)
+    find_package(GTest REQUIRED)
+    include(GoogleTest)
 endif()
 
 ## Parts Definition
@@ -68,14 +68,14 @@ add_library(cpp::json ALIAS json)
 
 
 if(BUILD_TESTING AND PROJECT_IS_TOP_LEVEL)
-  find_package(GTest REQUIRED)
-  include(GoogleTest)
-  add_subdirectory(test)
+    find_package(GTest REQUIRED)
+    include(GoogleTest)
+    add_subdirectory(test)
 endif()
 
 if(PROJECT_IS_TOP_LEVEL)
-  add_executable(main src/main.cpp)
-  target_link_libraries(main PRIVATE cpp::csv cpp::json)
+    add_executable(main src/main.cpp)
+    target_link_libraries(main PRIVATE cpp::csv cpp::json)
     target_include_directories(main
         PUBLIC
             ${CMAKE_CURRENT_SOURCE_DIR}/include
