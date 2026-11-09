@@ -1,29 +1,42 @@
 #include <cstdio>
-#include <map>
+#include <memory>
+#include <optional>
+#include <string>
 
 #include "json/jsonSerialize.hpp"  // adjust to your path
 
-enum Side { Buy, Sell };                          // unscoped: 0, 1
-enum class Status { Pending, Cleared, Settled };  // scoped:   0, 1, 2
+struct Inner {
+    int a;
+    std::string b;
+};
 
-struct Trade {
-    Side side;                                  // unscoped enum member
-    Status status;                              // scoped enum member
-    std::map<Status, double> notionalByStatus;  // enum KEY (non-string → entry array)
+struct Wrap {
+    std::optional<int> maybeInt;
+    std::optional<std::string> maybeStr;
+    std::optional<Inner> maybeObj;  // optional of a struct → recurse
+    std::unique_ptr<Inner> owned;   // owning ptr → recurse
+    std::shared_ptr<int> shared;    // owning ptr → scalar
+    const char* cstr;               // Trap 2: must be a string, not a char
 };
 
 int main() {
-    Trade t{
-        .side = Sell,
-        .status = Status::Cleared,
-        .notionalByStatus = {{Status::Pending, 1.0}, {Status::Settled, 3.5}},
+    Wrap present{
+        .maybeInt = 42,
+        .maybeStr = "hi",
+        .maybeObj = Inner{1, "x"},
+        .owned = std::make_unique<Inner>(Inner{2, "y"}),
+        .shared = std::make_shared<int>(7),
+        .cstr = nullptr,
     };
-    std::puts(json::serializer::to_json(t).c_str());
-
-    Trade u{
-        .side = Buy,
-        .status = static_cast<Status>(99),  // out of range → <unknown>
-        .notionalByStatus = {},
-    };
-    std::puts(json::serializer::to_json(u).c_str());
+    std::puts(json::serializer::toJson(present).c_str());
+    /*
+        Wrap empty{
+            .maybeInt = std::nullopt,
+            .maybeStr = std::nullopt,
+            .maybeObj = std::nullopt,
+            .owned = nullptr,
+            .shared = nullptr,
+            .cstr = nullptr,
+        };
+        std::puts(json::serializer::to_json(empty).c_str());*/
 }

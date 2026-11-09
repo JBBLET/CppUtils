@@ -2,6 +2,9 @@
 #include <string>
 #include <string_view>
 
+namespace utils::string {
+
+namespace impl {
 inline std::string otherEscapeChar(char c) {
     const char hexDigits[] = "0123456789ABCDEF";
     unsigned char uc = static_cast<unsigned char>(c);
@@ -37,11 +40,12 @@ inline std::string escapeChar(char c) {
                 c);  // Would move be better here ? but then need to include full utility for one move call
     }
 }
-
+}  // namespace impl
 inline void writeEscapedString(std::string& out, std::string_view s) {
     out += '"';
     for (char c : s) {
-        out += escapeChar(c);
+        out += impl::escapeChar(c);
     }
     out += '"';
 }
+}  // namespace utils::string
