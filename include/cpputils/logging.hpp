@@ -4,7 +4,6 @@
 #include <format>
 #include <print>
 #include <source_location>
-#include <string>
 #include <utility>
 
 namespace cpputils::logging {
