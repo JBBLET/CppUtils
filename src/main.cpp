@@ -1,11 +1,29 @@
-#include <meta>
+#include <cstdio>
+#include <map>
 
-struct Smoke { int a; double b; };
+#include "json/jsonSerialize.hpp"  // adjust to your path
+
+enum Side { Buy, Sell };                          // unscoped: 0, 1
+enum class Status { Pending, Cleared, Settled };  // scoped:   0, 1, 2
+
+struct Trade {
+    Side side;                                  // unscoped enum member
+    Status status;                              // scoped enum member
+    std::map<Status, double> notionalByStatus;  // enum KEY (non-string → entry array)
+};
 
 int main() {
-    template for (constexpr auto m : std::define_static_array(
-            std::meta::nonstatic_data_members_of(^^Smoke,
-                std::meta::access_context::unchecked()))) {
-        (void) std::meta::identifier_of(m);
-    }
+    Trade t{
+        .side = Sell,
+        .status = Status::Cleared,
+        .notionalByStatus = {{Status::Pending, 1.0}, {Status::Settled, 3.5}},
+    };
+    std::puts(json::serializer::to_json(t).c_str());
+
+    Trade u{
+        .side = Buy,
+        .status = static_cast<Status>(99),  // out of range → <unknown>
+        .notionalByStatus = {},
+    };
+    std::puts(json::serializer::to_json(u).c_str());
 }
