@@ -1,42 +1,36 @@
+#include <array>
 #include <cstdio>
-#include <memory>
-#include <optional>
 #include <string>
+#include <tuple>
+#include <utility>
+#include <variant>
 
 #include "json/jsonSerialize.hpp"  // adjust to your path
 
-struct Inner {
-    int a;
-    std::string b;
+struct Point {
+    int x;
+    int y;
 };
 
-struct Wrap {
-    std::optional<int> maybeInt;
-    std::optional<std::string> maybeStr;
-    std::optional<Inner> maybeObj;  // optional of a struct → recurse
-    std::unique_ptr<Inner> owned;   // owning ptr → recurse
-    std::shared_ptr<int> shared;    // owning ptr → scalar
-    const char* cstr;               // Trap 2: must be a string, not a char
+struct Bag {
+    std::tuple<int, std::string, double> tup;   // heterogeneous → array
+    std::pair<int, std::string> pr;             // standalone pair → 2-array (NOT key/value)
+    std::array<int, 3> arr;                     // range path → array
+    std::variant<int, std::string, Point> var;  // discriminated
 };
 
 int main() {
-    Wrap present{
-        .maybeInt = 42,
-        .maybeStr = "hi",
-        .maybeObj = Inner{1, "x"},
-        .owned = std::make_unique<Inner>(Inner{2, "y"}),
-        .shared = std::make_shared<int>(7),
-        .cstr = nullptr,
+    Bag b{
+        .tup = {1, "two", 3.5},
+        .pr = {7, "seven"},
+        .arr = {9, 8, 7},
+        .var = std::string{"hello"},  // alternative index 1
     };
-    std::puts(json::serializer::toJson(present).c_str());
-    /*
-        Wrap empty{
-            .maybeInt = std::nullopt,
-            .maybeStr = std::nullopt,
-            .maybeObj = std::nullopt,
-            .owned = nullptr,
-            .shared = nullptr,
-            .cstr = nullptr,
-        };
-        std::puts(json::serializer::to_json(empty).c_str());*/
+    std::puts(json::serializer::toJson(b).c_str());
+
+    b.var = 42;  // index 0 (int)
+    std::puts(json::serializer::toJson(b).c_str());
+
+    b.var = Point{1, 2};  // index 2 (struct → recurse)
+    std::puts(json::serializer::toJson(b).c_str());
 }

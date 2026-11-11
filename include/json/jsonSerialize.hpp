@@ -5,21 +5,24 @@
 
 #include <charconv>
 #include <concepts>
+#include <cstddef>
 #include <ranges>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <type_traits>
 #include <utility>
+#include <variant>
 
 #include "utils/string.hpp"
-
-using utils::string::writeEscapedString;
 
 namespace json::serializer {
 
 namespace impl {
 
-void separatorLogic(std::string& out, bool& sentinel) {
+using utils::string::writeEscapedString;
+
+void writeSeparator(std::string& out, bool& sentinel) {
     if (!sentinel)
         out.push_back(',');
     else
@@ -30,12 +33,14 @@ template <class T>
 void writeArithmetic(std::string& out, const T& value) {
     if constexpr (std::is_same_v<T, bool>) {
         out += value ? "true" : "false";
+    } else if constexpr (std::is_same_v<T, char>) {
+        out.push_back('"');
+        out.push_back(value);
+        out.push_back('"');
     } else if constexpr (std::is_arithmetic_v<T>) {
         char buf[64];
         auto [ptr, ec] = std::to_chars(buf, buf + sizeof buf, value);
         out.append(buf, ptr);
-    } else if constexpr (std::is_same_v<T, char>) {
-        out += "\"" + value + "\"";
     } else {
         static_assert(false, "writeArithmetic: unsupported type");
     }
@@ -66,7 +71,7 @@ void writeObject(std::string& out, const T& value) {
         std::define_static_array(std::meta::nonstatic_data_members_of(^^T, std::meta::access_context::unchecked()));
     template for (constexpr auto m : members) {
         if constexpr (std::meta::has_identifier(m)) {
-            separatorLogic(out, first);
+            writeSeparator(out, first);
             writeEscapedString(out, std::meta::identifier_of(m));
             out.push_back(':');
             writeValue(out, value.[:m:]);
@@ -94,7 +99,7 @@ void writeRange(std::string& out, const T& value) {
     bool first = true;
     out.push_back('[');
     for (const auto& v : value) {
-        separatorLogic(out, first);
+        writeSeparator(out, first);
         writeValue(out, v);
     }
     out.push_back(']');
@@ -106,7 +111,7 @@ void writeRange(std::string& out, const T& value) {
     bool first = true;
     out.push_back('{');
     for (const auto& p : value) {
-        separatorLogic(out, first);
+        writeSeparator(out, first);
         if constexpr (std::convertible_to<const typename T::key_type&, std::string_view>) {
             writeEscapedString(out, std::string_view{p.first});  // if key is already a string save an allocation
         } else {
@@ -124,7 +129,7 @@ void writeRange(std::string& out, const T& value) {
     bool first = true;
     out.push_back('[');
     for (const auto& p : value) {
-        separatorLogic(out, first);
+        writeSeparator(out, first);
         out += "{\"key\":";
         writeValue(out, p.first);
         out += ",\"value\":";
@@ -165,6 +170,41 @@ void writeCString(std::string& out, const T& value) {
         out += "null";
 }
 
+// Tuple,Pair
+template <class T>
+concept TupleLike = requires { std::tuple_size<T>::value; };
+
+template <class T>
+    requires TupleLike<T> && (!std::ranges::range<T>)
+void writeTuple(std::string& out, const T& value) {
+    out += '[';
+    std::apply(
+        [&](const auto&... v) {
+            bool first = true;
+            ((writeSeparator(out, first), writeValue(out, v)), ...);
+        },
+        value);
+    out += ']';
+}
+
+// Variant
+template <class T>
+concept VariantLike = requires { std::variant_size<T>::value; };
+
+template <VariantLike T>
+void writeVariant(std::string& out, const T& value) {
+    out += "{\"index\":";
+    std::size_t index = value.index();
+    if (index == std::variant_npos) {
+        out += "null,\"value\":null}";
+        return;
+    } else {
+        out += std::to_string(index);
+        out += ",\"value\":";
+        std::visit([&](const auto& v) { writeValue(out, v); }, value);
+        out += '}';
+    }
+}
 // Dispatcher
 template <class T>
 void writeValue(std::string& out, const T& value) {
@@ -185,6 +225,10 @@ void writeValue(std::string& out, const T& value) {
         // TODO(handle non smart pointer)
     } else if constexpr (std::ranges::range<T>) {
         writeRange(out, value);
+    } else if constexpr (VariantLike<T>) {
+        writeVariant(out, value);
+    } else if constexpr (TupleLike<T>) {
+        writeTuple(out, value);
     } else if constexpr (std::is_class_v<T>) {
         writeObject(out, value);
     } else {
