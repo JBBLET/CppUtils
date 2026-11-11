@@ -15,7 +15,7 @@
             "cacheVariables": {
                 "CPPPROJECTS_TEST_CPP_UTILS": "OFF",
                 "CPPPROJECTS_TEST_CSV": "OFF",
-                "CPPPROJECTS_TEST_JSON": "OFF",
+                "CPPPROJECTS_TEST_JSON": "ON",
                 "CPPPROJECTS_TEST_CSV_DIFF": "OFF"
             }
         },
