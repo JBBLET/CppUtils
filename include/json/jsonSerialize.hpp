@@ -4,25 +4,21 @@
 #include <meta>
 
 #include <charconv>
-#include <concepts>
-#include <cstddef>
-#include <ranges>
 #include <string>
-#include <string_view>
-#include <tuple>
 #include <type_traits>
-#include <utility>
-#include <variant>
 
-#include "utils/string.hpp"
+#include "cpputils/string.hpp"
+#include "json/json.hpp"
 
 namespace json::serializer {
 
 namespace impl {
 
 using utils::string::writeEscapedString;
-
-void writeSeparator(std::string& out, bool& sentinel) {
+using namespace json::impl;
+void writeSeparator(
+    std::string& out,
+    bool& sentinel) {
     if (!sentinel)
         out.push_back(',');
     else
@@ -30,7 +26,9 @@ void writeSeparator(std::string& out, bool& sentinel) {
 }
 
 template <class T>
-void writeArithmetic(std::string& out, const T& value) {
+void writeArithmetic(
+    std::string& out,
+    const T& value) {
     if constexpr (std::is_same_v<T, bool>) {
         out += value ? "true" : "false";
     } else if constexpr (std::is_same_v<T, char>) {
@@ -47,11 +45,15 @@ void writeArithmetic(std::string& out, const T& value) {
 }
 
 template <class T>
-void writeValue(std::string& out, const T& value);
+void writeValue(
+    std::string& out,
+    const T& value);
 
 // Enumerators
 template <class E>
-void writeEnum(std::string& out, const E& value) {
+void writeEnum(
+    std::string& out,
+    const E& value) {
     constexpr static auto enums = std::define_static_array(std::meta::enumerators_of(^^E));
     template for (constexpr auto e : enums) {
         if (value == [:e:]) {
@@ -64,7 +66,9 @@ void writeEnum(std::string& out, const E& value) {
 
 // Objects
 template <class T>
-void writeObject(std::string& out, const T& value) {
+void writeObject(
+    std::string& out,
+    const T& value) {
     bool first = true;
     out.push_back('{');
     constexpr static auto members =
@@ -81,21 +85,10 @@ void writeObject(std::string& out, const T& value) {
 }
 
 // Containers
-template <class T>
-concept Range = std::ranges::range<T>;
-
-template <class T>
-concept MapLike = Range<T> && requires {
-    typename T::key_type;
-    typename T::mapped_type;
-} && (std::is_same_v<typename T::value_type, std::pair<const typename T::key_type, typename T::mapped_type>>);
-// TODO(Include flatMaps)
-
-template <class K>
-concept StringKey = std::constructible_from<std::string, K>;
-
 template <Range T>
-void writeRange(std::string& out, const T& value) {
+void writeRange(
+    std::string& out,
+    const T& value) {
     bool first = true;
     out.push_back('[');
     for (const auto& v : value) {
@@ -107,7 +100,9 @@ void writeRange(std::string& out, const T& value) {
 
 template <class T>
     requires MapLike<T> && StringKey<typename T::key_type>
-void writeRange(std::string& out, const T& value) {
+void writeRange(
+    std::string& out,
+    const T& value) {
     bool first = true;
     out.push_back('{');
     for (const auto& p : value) {
@@ -125,7 +120,9 @@ void writeRange(std::string& out, const T& value) {
 
 template <class T>
     requires MapLike<T>
-void writeRange(std::string& out, const T& value) {
+void writeRange(
+    std::string& out,
+    const T& value) {
     bool first = true;
     out.push_back('[');
     for (const auto& p : value) {
@@ -139,31 +136,24 @@ void writeRange(std::string& out, const T& value) {
     out.push_back(']');
 }
 
-// Nullable
-template <class T>
-concept Nullable = requires(const T& t) {
-    static_cast<bool>(t);  // has a value (is non null)
-    *t;                    // dereferenceable
-};
+// TODO(Include flatMaps)
 
+// Nullable
 template <Nullable T>
-void writeNullable(std::string& out, const T& value) {
+void writeNullable(
+    std::string& out,
+    const T& value) {
     if (value)
         writeValue(out, *value);
     else
         out += "null";
 }
 
-// String Like
-template <class T>
-concept StringLike = std::is_same_v<T, std::string> || std::is_same_v<T, std::string_view>;
-
 // CStringLike
-template <class T>
-concept CStringLike = std::is_same_v<T, const char*> || std::is_same_v<T, char*>;
-
 template <CStringLike T>
-void writeCString(std::string& out, const T& value) {
+void writeCString(
+    std::string& out,
+    const T& value) {
     if (value)
         writeEscapedString(out, value);
     else
@@ -172,11 +162,10 @@ void writeCString(std::string& out, const T& value) {
 
 // Tuple,Pair
 template <class T>
-concept TupleLike = requires { std::tuple_size<T>::value; };
-
-template <class T>
     requires TupleLike<T> && (!std::ranges::range<T>)
-void writeTuple(std::string& out, const T& value) {
+void writeTuple(
+    std::string& out,
+    const T& value) {
     out += '[';
     std::apply(
         [&](const auto&... v) {
@@ -188,11 +177,10 @@ void writeTuple(std::string& out, const T& value) {
 }
 
 // Variant
-template <class T>
-concept VariantLike = requires { std::variant_size<T>::value; };
-
 template <VariantLike T>
-void writeVariant(std::string& out, const T& value) {
+void writeVariant(
+    std::string& out,
+    const T& value) {
     out += "{\"index\":";
     std::size_t index = value.index();
     if (index == std::variant_npos) {
@@ -205,9 +193,12 @@ void writeVariant(std::string& out, const T& value) {
         out += '}';
     }
 }
+
 // Dispatcher
 template <class T>
-void writeValue(std::string& out, const T& value) {
+void writeValue(
+    std::string& out,
+    const T& value) {
     /*The order in the if chain is significant because they are checks are not mutually exclusive
     For example char* is both CStringLike and Nullable it will be assigned in the first*/
     if constexpr (std::is_arithmetic_v<T>) {
