@@ -1,36 +1,40 @@
 #include <array>
 #include <cstdio>
+#include <map>
 #include <string>
-#include <tuple>
-#include <utility>
-#include <variant>
 
-#include "json/jsonSerialize.hpp"  // adjust to your path
+#include "json/jsonReader.hpp"  // adjust to your path
 
-struct Point {
-    int x;
-    int y;
+using json::reader::Json;
+
+struct User {
+    std::string name;
+    int id;
+};
+struct TestDom {
+    double leg;
+    bool received;
+    int id;
+    std::string receiver;
+    User user;
 };
 
-struct Bag {
-    std::tuple<int, std::string, double> tup;   // heterogeneous → array
-    std::pair<int, std::string> pr;             // standalone pair → 2-array (NOT key/value)
-    std::array<int, 3> arr;                     // range path → array
-    std::variant<int, std::string, Point> var;  // discriminated
-};
-
+void printObject(const TestDom& obj) {
+    std::printf("Leg:%.2f, type:%s \n", obj.leg, typeid(obj.leg).name());
+    std::printf("Received:%d, type:%s \n", obj.received, typeid(obj.received).name());
+    std::printf("ID:%d, type:%s \n", obj.id, typeid(obj.id).name());
+    std::printf("Receiver:%s, type:%s \n", obj.receiver.c_str(), typeid(obj.receiver).name());
+    std::printf("user:%s, type:%s \n", obj.user.name.c_str(), typeid(obj.user.name).name());
+    std::printf("user Id:%d, type:%s \n", obj.user.id, typeid(obj.user.id).name());
+}
 int main() {
-    Bag b{
-        .tup = {1, "two", 3.5},
-        .pr = {7, "seven"},
-        .arr = {9, 8, 7},
-        .var = std::string{"hello"},  // alternative index 1
-    };
-    std::puts(json::serializer::toJson(b).c_str());
-
-    b.var = 42;  // index 0 (int)
-    std::puts(json::serializer::toJson(b).c_str());
-
-    b.var = Point{1, 2};  // index 2 (struct → recurse)
-    std::puts(json::serializer::toJson(b).c_str());
+    Json jsonDOMTest{std::map<std::string, Json>{
+        {"leg", Json{3.14}},
+        {"received", Json{true}},
+        {"id", Json{double{1}}},
+        {"receiver", Json{"group"}},
+        {"user", Json{std::map<std::string, Json>{{"name", Json{"test_name"}}, {"id", Json{double{1}}}}}}
+    }};
+    TestDom test = json::reader::fromJson<TestDom>(jsonDOMTest);
+    printObject(test);
 }
